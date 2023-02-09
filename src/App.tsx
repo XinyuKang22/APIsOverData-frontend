@@ -1,26 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
+import { gql, useSubscription } from '@apollo/client';
+import { types, alias, subscription } from 'typed-graphqlify'
 import './App.css';
+import Table from './Table';
+
+const getActorsSub = subscription('GetActors', {
+  [alias('actor', 'actor')]: [{
+    id: types.string,
+    firstname: types.string,
+    lastname: types.string,
+  }],
+})
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+  const { loading, error, data } = useSubscription<typeof getActorsSub.data>(gql(getActorsSub.toString()));
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+  console.log(JSON.stringify(data))
+  if (data) return (
+    <div className="container">
+      <Table data={data.actor}/>
     </div>
   );
+  return <p>[]</p>;
 }
 
 export default App;
